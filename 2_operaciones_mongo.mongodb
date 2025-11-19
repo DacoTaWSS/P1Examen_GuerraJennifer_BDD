@@ -1,0 +1,80 @@
+
+use gastro_app;
+
+
+db.createCollection("platos", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["nombre_plato", "precio", "id_categoria"],
+      additionalProperties: false, 
+      properties: {
+        _id: {
+          bsonType: "objectId"
+        },
+        nombre_plato: {
+          bsonType: "string"
+        },
+        precio: {
+          bsonType: "double",
+          minimum: 0
+        },
+        id_categoria: {
+          bsonType: "number"
+        },
+        es_alcoholica: {
+          bsonType: "bool"
+        },
+        tamano_ml: {
+          bsonType: "int"
+        },
+        alergenos: {
+          bsonType: "array",
+          items: {
+            bsonType: "string"
+          }
+        }
+      }
+    }
+  }
+});
+
+//  Inserción Flexible: Insertar 3 platos que cumplan el schema, pero que demuestren flexibilidad (deben tener los 3 campos obligatorios MÁS los opcionales):
+
+// Plato 1 - Bebida alcohólica
+db.platos.insertOne({
+  nombre_plato: "Ron con cola",
+  precio: 3.50,
+  id_categoria: 3,
+  es_alcoholica: true,
+  tamano_ml: 500
+});
+
+// Plato 2 - Plato fuerte
+db.platos.insertOne({
+  nombre_plato: "Fideos en salsa de champiñones premiunn",
+  precio: 8.90,
+  id_categoria: 2, 
+  alergenos: ["gluten", "lactosa"]
+});
+
+// Plato 3 - Bebida sin alcohol
+db.platos.insertOne({
+  nombre_plato: "Jugo de coquito",
+  precio: 4.10,
+  id_categoria: 3, 
+  es_alcoholica: false,
+  tamano_ml: NumberInt(900)
+});
+
+// Actualizar el precio de la "Bebida 1" incrementándolo en 0.50
+db.platos.updateOne(
+  { nombre_plato: "Ron con cola" },
+  { $inc: { precio: 0.50 } }
+);
+
+//  Obtener bebidas (es_alcoholica existe) con precio < 5.00
+db.platos.find(
+  { es_alcoholica: { $exists: true }, precio: { $lt: 5.00 } },
+  { _id: 0, nombre_plato: 1, precio: 1, es_alcoholica: 1 }
+);
